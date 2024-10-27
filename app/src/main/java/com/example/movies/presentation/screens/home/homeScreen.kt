@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.movies.R
@@ -42,7 +43,7 @@ fun HomeScreen(
 
         when (genresUiState) {
             is GenresUiState.Loading -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = Color.Gray)
             }
 
             is GenresUiState.Error -> {
@@ -76,7 +77,7 @@ fun HomeScreen(
 
         when (mostSearchedUiState) {
             is MostSearchedUiState.Loading -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = Color.Gray)
             }
 
             is MostSearchedUiState.Error -> {
