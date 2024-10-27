@@ -1,92 +1,114 @@
 package com.example.movies.presentation.screens.movieDetails.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.movies.R
 import com.example.movies.presentation.theme.MoviesTheme
+import com.example.movies.util.Constants.IMAGES_BASE
 
 @Composable
 fun ActorCard(
-    actorName: String = "Maria Espaes",
-    actorRole: String = "As Morbiuds",
-    actorImage: Int = R.drawable.person
+    actorName: String,
+    actorRole: String,
+    actorImage: String,
+    cardIndex : Int = 0,
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 4.dp).height(52.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .padding(end = if (cardIndex % 2 == 0) 17.dp else 0.dp)
+            .wrapContentHeight()
     ) {
-        Box {
-            Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFF5E5E5E),
-                            shape = MaterialTheme.shapes.large
-                        )
-                        .padding(
-                            start = 58.dp,
-                            end = 30.dp,
-                            top = 8.dp,
-                            bottom = 8.dp
-                        )
-                ) {
-                    Text(
-                        text = actorName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.width(82.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+        Box(
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFE9E9E9),
+                        shape = MaterialTheme.shapes.large
                     )
-                    Text(
-                        text = actorRole,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(top = 2.dp).width(53.dp),
-                        textAlign = TextAlign.Start,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
+                    .padding(
+                        start = 80.dp,
+                        end = 40.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
                     )
-                }
-            }
-
-            Card(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(25.dp)
             ) {
-                Image(
-                    painter = painterResource(id = actorImage),
-                    contentDescription = "Actor Image",
-                    modifier = Modifier.size(52.dp),
-                    contentScale = ContentScale.FillBounds
+                Text(
+                    text = actorName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.width(82.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = actorRole,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .width(53.dp),
+                    textAlign = TextAlign.Start,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
                 )
             }
+
+            SubcomposeAsyncImage(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                model = ImageRequest.Builder(context = LocalContext.current)
+                    .data(IMAGES_BASE + actorImage)
+                    .crossfade(true)
+                    .build(),
+                loading = {
+                    CircularProgressIndicator()
+                },
+                error = {
+                    Image(
+                        painter = painterResource(id = R.drawable.person),
+                        contentDescription = null
+                    )
+                },
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
         }
     }
 }
@@ -95,6 +117,10 @@ fun ActorCard(
 @Composable
 private fun ActorCardPreview() {
     MoviesTheme {
-        ActorCard()
+        ActorCard(
+            actorName = "John Doe",
+            actorRole = "Actor",
+            actorImage = "https://example.com/actor_image.jpg"
+        )
     }
 }

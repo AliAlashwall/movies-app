@@ -1,4 +1,4 @@
-package com.example.movies.presentation.screens.home.component
+package com.example.movies.presentation.components
 
 import android.content.Context
 import androidx.compose.foundation.Image
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,23 +23,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.movies.R
+import com.example.movies.domain.model.MoviesRes
 import com.example.movies.presentation.theme.MoviesTheme
 import com.example.movies.presentation.theme.outline
+import com.example.movies.util.Constants.IMAGES_BASE
 
-data class MovieDetails(
-    val title: String,
-    val image: Int,
-    val releasedYear: String,
-)
 
 @Composable
 fun MovieCard(
-    movieDetails: MovieDetails,
+    movieDetails: MoviesRes.Result,
     context: Context = LocalContext.current,
     onMovieClicked: () -> Unit = {}
 ) {
@@ -58,13 +57,10 @@ fun MovieCard(
                     width = 0.dp
                 ),
             model = ImageRequest.Builder(context = context)
-                .data(movieDetails.image).crossfade(true)
+                .data(IMAGES_BASE + movieDetails.backdropPath).crossfade(true)
                 .build(),
             loading = {
-                Image(
-                    painter = painterResource(id = R.drawable.movie_card),
-                    contentDescription = null
-                )
+                CircularProgressIndicator()
             },
             error = {
                 Image(
@@ -82,10 +78,12 @@ fun MovieCard(
             text = movieDetails.title,
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = movieDetails.releasedYear,
+            text = movieDetails.voteAverage.toString().take(3),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -101,10 +99,21 @@ fun MovieCard(
 private fun MovieCardPreview() {
     MoviesTheme {
         MovieCard(
-            movieDetails = MovieDetails(
-                title = "Movie Title",
-                image = R.drawable.movie_card,
-                releasedYear = "2022"
+            movieDetails = MoviesRes.Result(
+                adult = false,
+                backdropPath = "/path/to/backdrop.jpg",
+                genreIds = listOf(1, 2, 3), // Assuming these IDs correspond to certain genres
+                id = 12345,
+                originalLanguage = "en",
+                originalTitle = "Mock Movie Title",
+                overview = "This is a mock overview of the movie.",
+                popularity = 10.5,
+                posterPath = "/path/to/poster.jpg",
+                releaseDate = "2024-10-27",
+                title = "Mock Movie",
+                video = false,
+                voteAverage = 7.5,
+                voteCount = 1500
             )
         )
     }
