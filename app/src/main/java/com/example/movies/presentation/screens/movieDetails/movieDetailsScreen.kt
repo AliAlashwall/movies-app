@@ -12,161 +12,214 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.movies.R
-import com.example.movies.presentation.screens.home.component.MovieCard
-import com.example.movies.presentation.screens.home.component.MovieDetails
+import com.example.movies.presentation.components.MovieCard
 import com.example.movies.presentation.screens.movieDetails.component.ActorCard
 import com.example.movies.presentation.screens.movieDetails.component.CustomRatingBar
 import com.example.movies.presentation.theme.MoviesTheme
 import com.example.movies.presentation.theme.primary
-
-data class ActorDetails(
-    val name: String,
-    val role: String,
-    val image: Int,
-)
+import com.example.movies.util.Constants.IMAGES_BASE
 
 @Composable
 fun MovieDetailsScreen(
-    rating: Float, numberOfRatingUsers: Int = 342,
-    actors: List<ActorDetails>,
-    mostSearched: List<MovieDetails>,
-    onBackClicked: () -> Unit = {}
+    movieId: Int,
+    language: String,
+    viewModel: MovieDetailsViewModel = hiltViewModel(),
+    onBackClicked: () -> Unit
 ) {
-    Column(Modifier.fillMaxSize()) {
+    val movieDetailsState = viewModel.movieDetailsState.collectAsState().value
+    val mostSearchedState = viewModel.mostSearchedState.collectAsState().value
 
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = R.drawable.movie_1),
-                contentDescription = stringResource(R.string.movie_image),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp),
-                contentScale = ContentScale.FillBounds
-            )
+    LaunchedEffect(movieId) {
+        viewModel.fetchMovieDetails(movieId, language)
+        viewModel.fetchMostSearchedMovies(language)
+    }
 
-            Card(
-                colors = CardDefaults.cardColors(primary),
-                modifier = Modifier.clickable { onBackClicked() }
-                    .padding(start = 20.dp, top = 44.dp)
-                    .size(35.dp),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_arrow_back_ios_new_24),
-                        contentDescription = "back",
+    when (movieDetailsState) {
+        is MovieDetailsUiState.Loading -> {
+            Text("Loading movie details...")
+        }
+
+        is MovieDetailsUiState.Success -> {
+            val movieDetails = movieDetailsState.movieDetails
+            val actors = movieDetails.productionCompanies.filter { it.logoPath != null }
+            val rating = movieDetails.voteAverage
+            val numberOfRatingUsers = movieDetails.voteCount
+
+            Column(Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(IMAGES_BASE + movieDetails.backdropPath)
+                            .build(),
+                        contentDescription = stringResource(R.string.movie_image),
                         modifier = Modifier
-                            .padding(vertical = 8.dp, horizontal = 11.dp)
-                            .size(24.dp)
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentScale = ContentScale.FillBounds
                     )
+
+                    Card(
+                        colors = CardDefaults.cardColors(primary),
+                        modifier = Modifier
+                            .padding(start = 20.dp, top = 44.dp)
+                            .size(35.dp),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_arrow_back_ios_new_24),
+                                contentDescription = "back",
+                                modifier = Modifier
+                                    .clickable { onBackClicked() }
+                                    .padding(vertical = 8.dp, horizontal = 11.dp)
+                                    .size(24.dp)
+                            )
+                        }
+                    }
                 }
 
-            }
-        }
+                Spacer(modifier = Modifier.height(7.dp))
 
-        Spacer(modifier = Modifier.height(7.dp))
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp)
+                ) {
+                    Column(Modifier.weight(0.7f)) {
+                        Text(
+                            text = movieDetails.title,
+                            style = MaterialTheme.typography.displayMedium,
+                            modifier = Modifier,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = movieDetails.originalTitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 17.dp, end = 27.dp),
 
-            ) {
-            Column {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top,
+                        modifier = Modifier
+                            .weight(0.3f)
+                            .padding(top = 4.dp)
+                    ) {
+                        CustomRatingBar(
+                            rating = rating.toFloat(),
+                            modifier = Modifier
+                        )
+                        Text(
+                            text = "From $numberOfRatingUsers users",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 6.dp)
+                        )
+                    }
+                }
+
                 Text(
-                    text = "Morbius",
-                    style = MaterialTheme.typography.displayMedium,
-                    modifier = Modifier
+                    text = movieDetails.overview,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color(0xFF8F8F8F),
+                    modifier = Modifier.padding(
+                        start = 17.dp,
+                        end = 32.dp,
+                        top = 17.dp,
+                        bottom = 23.dp
+                    ),
+                    maxLines = 6,
+                    overflow = TextOverflow.Ellipsis
                 )
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.padding(start = 17.dp, end = 14.dp)
+                ) {
+                    items(actors.size) { index ->
+                        ActorCard(
+                            actorName = actors[index].name,
+                            actorRole = actors[index].originCountry,
+                            actorImage = actors[index].logoPath?: "",
+                            cardIndex = index
+                        )
+
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
-                    text = "Marvel Studios",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 2.dp)
+                    text = stringResource(R.string.most_searched),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 17.dp)
                 )
 
-            }
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.weight(1f))
+                when (mostSearchedState) {
+                    is MostSearchedUiState.Loading -> {
+                        Text("Loading most searched movies...")
+                    }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier.padding(top = 4.dp)
-            ) {
-                CustomRatingBar(
-                    rating = rating,
-                    modifier = Modifier
-                )
-                Text(
-                    text = "From $numberOfRatingUsers users",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-            }
-        }
+                    is MostSearchedUiState.Success -> {
+                        LazyRow(modifier = Modifier.padding(horizontal = 17.dp)) {
+                            items(mostSearchedState.movies) { movie ->
+                                MovieCard(
+                                    movieDetails = movie,
+                                )
+                            }
+                        }
+                    }
 
-        Text(
-            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex...",
-            style = MaterialTheme.typography.titleSmall,
-            color = Color(0xFF8F8F8F),
-            modifier = Modifier.padding(start = 17.dp, end = 32.dp, top = 17.dp, bottom = 23.dp)
-        )
+                    is MostSearchedUiState.Error -> {
+                        Text("Error loading most searched movies: ${mostSearchedState.message}")
+                    }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.padding(start = 17.dp, end = 14.dp)
-        ) {
-            items(actors.size) { index ->
-                val actor = actors[index]
-                ActorCard(
-                    actorName = actor.name,
-                    actorRole = actor.role,
-                    actorImage = actor.image
-                )
-
-                if (index != actors.size - 1) {
-                    Spacer(modifier = Modifier.width(17.dp))
+                    is MostSearchedUiState.Empty -> {
+                        Text("No most searched movies found.")
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        is MovieDetailsUiState.Error -> {
+            Text("Error loading movie details: ${movieDetailsState.message}")
+        }
 
-        Text(
-            text = stringResource(R.string.most_searched),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 17.dp)
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        LazyRow(modifier = Modifier.padding(horizontal = 17.dp)) {
-            items(mostSearched.size) {
-                MovieCard(
-                    movieDetails = mostSearched[it],
-                )
-            }
+        is MovieDetailsUiState.Empty -> {
+            Text("No movie details found.")
         }
     }
 }
@@ -176,16 +229,9 @@ fun MovieDetailsScreen(
 private fun MovieDetailsScreenPreview() {
     MoviesTheme {
         MovieDetailsScreen(
-            rating = 5f, actors = listOf(
-                ActorDetails("Jared Leto", "Dr. Michael Morbius", R.drawable.person),
-            ),
-            mostSearched = listOf(
-                MovieDetails(
-                    title = "Movie Title",
-                    image = R.drawable.movie_card,
-                    releasedYear = "2022"
-                )
-            )
+            movieId = 1,
+            language = "en",
+            onBackClicked = {}
         )
     }
 }
