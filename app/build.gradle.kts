@@ -1,6 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-parcelize")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -18,6 +23,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+    }
+
+    defaultConfig {
+        // should correspond to key/value pairs inside the file
+        buildConfigField("String", "BEARER_TOKEN", "${project.findProperty("BEARER_TOKEN")}")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -59,12 +73,34 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-//    Coil
+
+    // Coil
     implementation(libs.coil.compose)
-//Navigation
+    // Navigation
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
+    //Dagger - Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.dagger.hilt.android.compiler)
+    kapt(libs.hilt.compiler)
+
+    // Kotlinx Serialization
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+
+    //retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
