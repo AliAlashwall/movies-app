@@ -24,37 +24,34 @@ import com.example.movies.presentation.theme.onSurface
 
 
 @Composable
-fun CustomSearchBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    onSearch: (String) -> Unit,
-    onFocusClear: () -> Unit,
-    enabled: Boolean = true,
-    hideKeyboard: Boolean,
+fun MySearchBar(
+    content: String = "",
+    onContentChange: (String) -> Unit = {},
+    onSearch: (String) -> Unit = {},
+    onFocusClear: () -> Unit = {},
+    hideKeyboard: Boolean = false
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
     val containerColor = Color(0xFFE8E8E8)
     OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
+        value = content,
+        onValueChange = onContentChange,
         textStyle = MaterialTheme.typography.bodyMedium,
-        enabled = enabled,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = containerColor,
             unfocusedContainerColor = containerColor,
-            disabledContainerColor = containerColor,
-            errorContainerColor = Color.Transparent,
+
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
         ),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {
-            if (query.isNotEmpty()) {
+            if (content.isNotEmpty()) {
                 keyboardController?.hide()
                 focusManager.clearFocus()
-                onSearch(query)
+                onSearch(content)
             }
         }),
         singleLine = true,
@@ -76,21 +73,14 @@ fun CustomSearchBar(
     )
     if (hideKeyboard) {
         focusManager.clearFocus()
-        // Call onFocusClear to reset hideKeyboard state to false
         onFocusClear()
     }
 }
 
 @Preview(showSystemUi = true)
 @Composable
-fun CustomSearchBarPreview() {
+fun MySearchBarPreview() {
     MoviesTheme {
-        CustomSearchBar(
-            query = "",
-            onQueryChange = {},
-            onSearch = {},
-            hideKeyboard = false,
-            onFocusClear = {},
-        )
+        MySearchBar()
     }
 }
