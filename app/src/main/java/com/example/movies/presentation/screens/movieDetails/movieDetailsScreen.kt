@@ -1,6 +1,7 @@
 package com.example.movies.presentation.screens.movieDetails
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +47,8 @@ data class ActorDetails(
 fun MovieDetailsScreen(
     rating: Float, numberOfRatingUsers: Int = 342,
     actors: List<ActorDetails>,
-    mostSearched: List<MovieDetails>
+    mostSearched: List<MovieDetails>,
+    onBackClicked: () -> Unit = {}
 ) {
     Column(Modifier.fillMaxSize()) {
 
@@ -62,7 +64,7 @@ fun MovieDetailsScreen(
 
             Card(
                 colors = CardDefaults.cardColors(primary),
-                modifier = Modifier
+                modifier = Modifier.clickable { onBackClicked() }
                     .padding(start = 20.dp, top = 44.dp)
                     .size(35.dp),
                 shape = MaterialTheme.shapes.medium
@@ -163,7 +165,6 @@ fun MovieDetailsScreen(
             items(mostSearched.size) {
                 MovieCard(
                     movieDetails = mostSearched[it],
-//                    cardWidth = 100.dp
                 )
             }
         }
@@ -177,26 +178,8 @@ private fun MovieDetailsScreenPreview() {
         MovieDetailsScreen(
             rating = 5f, actors = listOf(
                 ActorDetails("Jared Leto", "Dr. Michael Morbius", R.drawable.person),
-                ActorDetails("Matt Smith", "Loxias Crown", R.drawable.person),
-                ActorDetails("Adria Arjona", "Martine Bancroft", R.drawable.person),
-                ActorDetails("Jared Harris", "Morbius' mentor", R.drawable.person),
             ),
             mostSearched = listOf(
-                MovieDetails(
-                    title = "Movie Title",
-                    image = R.drawable.movie_card,
-                    releasedYear = "2022"
-                ),
-                MovieDetails(
-                    title = "Movie Title",
-                    image = R.drawable.movie_card,
-                    releasedYear = "2022"
-                ),
-                MovieDetails(
-                    title = "Movie Title",
-                    image = R.drawable.movie_card,
-                    releasedYear = "2022"
-                ),
                 MovieDetails(
                     title = "Movie Title",
                     image = R.drawable.movie_card,

@@ -3,6 +3,7 @@ package com.example.movies.presentation.screens.home.component
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +23,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -39,19 +39,24 @@ data class MovieDetails(
 @Composable
 fun MovieCard(
     movieDetails: MovieDetails,
-    cardWidth: Dp = 124.dp,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
+    onMovieClicked: () -> Unit = {}
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .padding(vertical = 8.dp, horizontal = 8.dp)
-            .width(cardWidth)
+            .width(124.dp)
     ) {
         SubcomposeAsyncImage(
             modifier = Modifier
+                .clickable { onMovieClicked() }
                 .size(124.dp)
-                .border(color = Color.Transparent, shape = RoundedCornerShape(24.dp), width = 0.dp),
+                .border(
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(24.dp),
+                    width = 0.dp
+                ),
             model = ImageRequest.Builder(context = context)
                 .data(movieDetails.image).crossfade(true)
                 .build(),
@@ -69,8 +74,7 @@ fun MovieCard(
             },
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
-
-            )
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 

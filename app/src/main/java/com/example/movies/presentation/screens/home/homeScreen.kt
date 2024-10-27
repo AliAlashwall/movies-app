@@ -27,6 +27,7 @@ import com.example.movies.presentation.theme.MoviesTheme
 fun HomeScreen(
     categories: List<String>,
     mostSearched: List<MovieDetails>,
+    onMovieClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -36,7 +37,7 @@ fun HomeScreen(
         Text(
             text = stringResource(R.string.search_for_a_content),
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(top = 27.dp, bottom = 8.dp)
+            modifier = Modifier.padding(top = 40.dp, bottom = 8.dp)
         )
         CustomSearchBar(
             query = "",
@@ -70,7 +71,10 @@ fun HomeScreen(
 
         LazyVerticalGrid(columns = GridCells.Fixed(3)) {
             items(mostSearched.size) {
-                MovieCard(movieDetails = mostSearched[it])
+                MovieCard(
+                    movieDetails = mostSearched[it],
+                    onMovieClicked = onMovieClicked
+                )
             }
         }
     }
@@ -111,6 +115,6 @@ private fun HomeScreenPreview() {
                 ),
 
                 )
-        )
+        ){}
     }
 }
